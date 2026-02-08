@@ -42,9 +42,13 @@ def create(todo: Todo, session: Session = Depends(get_session)):
    return create_todo(session, todo)
 
 
-@app.delete("/todos/{todo_id}", response_model=Todo)
+@app.delete("/todos/{todo_id}")
 def delete(todo_id: int, session: Session = Depends(get_session)):
-   return delete_todo(session, todo_id)
+    try:
+        deleted_todo = delete_todo(session, todo_id)
+        return {"message": "Todo deleted successfully", "deleted_id": todo_id}
+    except ValueError:
+        raise HTTPException(status_code=404, detail=f"Todo with id {todo_id} not found")
 
 @app.put('/todos/{todo_id}', response_model=Todo)
 def update(todo_id: int, todo: Todo, session: Session = Depends(get_session)):

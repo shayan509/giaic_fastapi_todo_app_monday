@@ -16,10 +16,11 @@ def create_todo(session, todo: Todo):
 
 def delete_todo(session, todo_id):
     todo = session.get(Todo, todo_id)
+    if not todo:
+        raise ValueError(f"Todo with id {todo_id} not found")
     session.delete(todo)
     session.commit()
-    session.refresh(todo)
-    return todo
+    return todo  # Return the todo before it gets deleted from session cache
 
 def update_todo(session,todo_id,data):
     todo = session.get(Todo,todo_id)

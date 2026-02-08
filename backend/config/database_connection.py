@@ -1,9 +1,12 @@
 from sqlmodel import SQLModel, create_engine, Session
+import os
 
-DATABASE_URL = "postgresql+psycopg://neondb_owner:npg_En0gRNYMBxT2@ep-noisy-glitter-a4neqqan-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+# Use SQLite for local development
+DATABASE_URL = "sqlite:///./todo.db"
 
 engine = create_engine(
-    DATABASE_URL
+    DATABASE_URL, 
+    connect_args={"check_same_thread": False}  # Required for SQLite
 )
 
 def create_db_and_tables():

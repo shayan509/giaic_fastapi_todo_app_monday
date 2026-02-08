@@ -9,7 +9,7 @@ type Todo = {
 };
 
 export default function Home() {
-  const API = "http://127.0.0.1:8000/todos";
+  const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
   const [todos, setTodos] = useState<Todo[]>([]);
   const [form, setForm] = useState<Todo>({
     title: "",
@@ -19,7 +19,7 @@ export default function Home() {
   const [editingId, setEditingId] = useState<number | null>(null);
 
   async function load() {
-    const res = await fetch(API);
+    const res = await fetch(`${API}/todos`);
     setTodos(await res.json());
   }
 
@@ -28,7 +28,7 @@ export default function Home() {
   }, []);
 
   async function create() {
-    await fetch(API, {
+    await fetch(`${API}/todos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -37,7 +37,7 @@ export default function Home() {
   }
 
   async function update() {
-    await fetch(`${API}/${editingId}`, {
+    await fetch(`${API}/todos/${editingId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
@@ -46,8 +46,17 @@ export default function Home() {
   }
 
   async function remove(id: number) {
-    await fetch(`${API}/${id}`, { method: "DELETE" });
-    load();
+    try {
+      const response = await fetch(`${API}/todos/${id}`, { method: "DELETE" });
+      if (!response.ok) {
+        throw new Error(`Failed to delete todo: ${response.status} ${response.statusText}`);
+      }
+      // The response is successful, reload the todos
+      load();
+    } catch (error) {
+      console.error('Error deleting todo:', error);
+      alert('Failed to delete todo. Please try again.');
+    }
   }
 
   function reset() {
